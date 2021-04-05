@@ -11,22 +11,49 @@ struct ContentView: View {
     
     @State private var weight: String = ""
     @State private var length: String = ""
-    @State private var result: String = ""
+    @State private var width: String = ""
+    @State private var result: String = "0"
     
     private var weight_units = ["Pounds","Kilograms","Tons"]
     private var length_units = ["Feet", "Yards", "Meters","Kilometers", "Miles"]
+    private var width_units = ["Feet", "Yards", "Meters"]
+    private var result_units = ["lbs/yds", "lbs/ft", "tons/ft", "kg/m"]
+    
     @State private var selected_weight = "Pounds"
     @State private var selected_length = "Feet"
+    @State private var selected_width = "Feet"
+    @State private var selected_result = "lbs/yds"
     
     
     
     var body: some View {
         
         VStack {
-            
+            // Logo/Title
             Text("SpreadRate Pro")
+                .font(.largeTitle)
                 .padding()
-            Text(result)
+            
+            Spacer()
+            
+            // Result
+            HStack(alignment: .top) {
+ //               Text("Spread Rate: ").font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
+                Text(result).font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/).padding(.trailing, 3.0)
+                Text(selected_result).font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
+                Text("2").font(/*@START_MENU_TOKEN@*/.body/*@END_MENU_TOKEN@*/)
+            }
+            Picker("Select a unit for result", selection: $selected_result) {
+                ForEach(result_units, id: \.self) {
+                    Text($0)
+                }
+            }.onChange(of: selected_result, perform: { value in
+                callSpreadRateFunctions()
+            })
+            
+            Spacer()
+            
+            VStack {
             
             //Weight
             TextField("Enter Weight", text: $weight)
@@ -36,7 +63,9 @@ struct ContentView: View {
                 ForEach(weight_units, id: \.self) {
                     Text($0)
                 }
-            }
+            }.onChange(of: selected_width, perform: { value in
+                callSpreadRateFunctions()
+            })
             
             //Length
             TextField("Enter Length", text: $length)
@@ -46,16 +75,31 @@ struct ContentView: View {
                 ForEach(length_units, id: \.self) {
                     Text($0)
                 }
-            }
+            }.onChange(of: selected_width, perform: { value in
+                callSpreadRateFunctions()
+            })
             
-            
-            
-            Button(action: {
-                if !(weight.isEmpty || length.isEmpty) {
-                    result = calculate(width: weight, length: length)
-                    callSpreadRateFunctions()
-                    buttonPressed()
+            // Width
+            TextField("Enter Width", text: $width)
+                .keyboardType(/*@START_MENU_TOKEN@*/.decimalPad/*@END_MENU_TOKEN@*/)
+                .padding()
+            Picker("Select a unit for length", selection: $selected_width) {
+                ForEach(width_units, id: \.self) {
+                    Text($0)
                 }
+            }.onChange(of: selected_width, perform: { value in
+                    callSpreadRateFunctions()
+                })
+                
+            } // embedded VStack
+            
+            Spacer()
+            
+            // Calculate button
+            Button(action: {
+                callSpreadRateFunctions()
+                buttonPressed()
+                
             }, label: {
                 Text("Calculate")
             })
@@ -65,37 +109,26 @@ struct ContentView: View {
         /* VStack modifiers*/
         .multilineTextAlignment(.center)
         .pickerStyle(SegmentedPickerStyle())
-        .ignoresSafeArea()
         
-        
-    }
-    func calculate(width: String, length: String) -> String {
-        var valid:Bool = true
-        var res: String = ""
-        if Float(width) == nil{
-            res.append("Width is invalid")
-            valid = false
-        }
-        if Float(length) == nil{
-            res.append("\nLength is invalid")
-            valid = false
-        }
-        if valid {
-            res = String(Float(width)! + Float(length)!)
-        }
-       
-        
-        return String(res)
-    }
-    func buttonPressed() {
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-    }
-    func callSpreadRateFunctions(){
-        let a = SpreadRateFunctions(weight_unit: selected_weight, length_unit: selected_length, weight: weight, length: length)
-        result = String(a.convert_length(unit: a.length_unit, value: a.length) * a.convert_weight(unit: a.weight_unit, value: a.weight))
         
     }
     
+    // Dismiss keyboard on button press
+    func buttonPressed() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+    
+    
+    func callSpreadRateFunctions(){
+        
+        if !(weight.isEmpty || length.isEmpty || width.isEmpty) {
+                
+            let a = SpreadRateFunctions(weight_unit: selected_weight, length_unit: selected_length, width_unit: selected_width,
+                                        result_unit: selected_result, weight: weight, length: length, width: width)
+            result = a.getResults()
+        }
+        
+    }
 }
 
 struct ContentView_Previews: PreviewProvider {
