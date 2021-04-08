@@ -11,7 +11,7 @@ import SwiftUI
 struct SpreadRatePro1_2App: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView().preferredColorScheme(.light)
         }
     }
 }
@@ -31,9 +31,9 @@ public struct SpreadRateFunctions {
         self.width_unit = width_unit
         self.result_unit = result_unit
         // Avoiding division by zero
-        self.weight = Float(weight) ?? 0
-        self.length = Float(length)!
-        self.width = Float(width)!
+        self.weight = Float(weight) ?? -1
+        self.length = Float(length) ?? -1
+        self.width = Float(width) ?? -1
     }
     
     func convert_length(unit: String, value: Float) -> Float {
@@ -69,13 +69,55 @@ public struct SpreadRateFunctions {
     // Pounds / Feet^2
     // Tons / Feet^2
     // Kg / Meter^2
+    
+    //float units should be in ft when passed to function
+    func convert_result(result_unit: String, weight: Float, length: Float, width: Float) -> Float {
+        
+        let units = result_unit.split(separator: "/")
+        
+        var numerator: Float
+        var denominator: Float
+        
+        switch units[0] {
+            case "lbs":
+                numerator = weight
+            case "kg":
+                numerator = weight / 2.20462
+            case "tons":
+                numerator = weight / 2000
+            default:
+                numerator = 0
+        }
+        switch units[1] {
+            case "ft":
+                denominator = length * width
+            case "yds":
+                denominator = (length / 3) * (width / 3)
+                
+            case "m":
+                denominator = (length / 3.28084) * (width / 3.28084)
+                
+            default:
+                denominator = 1
+        }
+        
+        return numerator / denominator
+    }
+    
+    
     func getResults() -> String {
         let weight = self.convert_weight(unit: self.weight_unit, value: self.weight)
         let length = self.convert_length(unit: self.length_unit, value: self.length)
         let width = self.convert_length(unit: self.width_unit, value: self.width)
-        return String(weight / (length * width))
+        if weight < 0 || length <= 0 || width <= 0 {
+            return "-1"
+        }
+        
+        let res = convert_result(result_unit: self.result_unit, weight: weight, length: length, width: width)
+        
+
+        return String(res)
 
     }
     
 }
-
