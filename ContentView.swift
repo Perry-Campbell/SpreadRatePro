@@ -30,14 +30,14 @@ struct ContentView: View {
         //this changes the "thumb" that selects between items
         UISegmentedControl.appearance().selectedSegmentTintColor = .systemBlue
         //and this changes the color for the whole "bar" background
-        UISegmentedControl.appearance().backgroundColor = .white
+        UISegmentedControl.appearance().backgroundColor = UIColor.systemBackground
 
         //this will change the font size
         UISegmentedControl.appearance().setTitleTextAttributes([.font : UIFont.preferredFont(forTextStyle: .largeTitle)], for: .normal)
 
         //these lines change the text color for various states
         UISegmentedControl.appearance().setTitleTextAttributes([.foregroundColor : UIColor.white], for: .selected)
-        UISegmentedControl.appearance().setTitleTextAttributes([.foregroundColor : UIColor.black], for: .normal)
+        UISegmentedControl.appearance().setTitleTextAttributes([.foregroundColor : UIColor.label], for: .normal)
     }
     
     
@@ -45,10 +45,10 @@ struct ContentView: View {
     var body: some View {
         
         ZStack {
-            LinearGradient(gradient: Gradient(colors: [Color.white, Color.blue]), startPoint: .top, endPoint: .bottom).ignoresSafeArea(edges: /*@START_MENU_TOKEN@*/.bottom/*@END_MENU_TOKEN@*/)
+            LinearGradient(gradient: Gradient(colors: [Color("gradientFade"), Color.blue]),
+                           startPoint: .top, endPoint: .bottom).ignoresSafeArea(edges: .bottom)
                 .padding(.top, 50)
             
-        
             VStack {
                 
                 // Logo/Title
@@ -91,7 +91,7 @@ struct ContentView: View {
                             .font(.title)
                             .padding()
                     }
-                }.shadow(color: .white, radius: 20)
+                }.shadow(color: Color("gradientFade"), radius: 20)
                 .padding(.top, 40.0)
                 Picker("Select a unit for result", selection: $selected_result) {
                     ForEach(result_units, id: \.self) {
@@ -113,7 +113,6 @@ struct ContentView: View {
                     }
                     .textFieldStyle(OvalTextFieldStyle())
                     .keyboardType(/*@START_MENU_TOKEN@*/.decimalPad/*@END_MENU_TOKEN@*/)
-                    .padding(5)
                     
                 
                 Picker("Select a unit for weight", selection: $selected_weight) {
@@ -126,12 +125,11 @@ struct ContentView: View {
                 .shadow(color: .gray, radius: 2)
                     
                 //Length
-                TextField("Enter Length", text: $length).onReceive(weight.publisher.collect()) {
-                    self.weight = String($0.prefix(max_char_len))
+                TextField("Enter Length", text: $length).onReceive(length.publisher.collect()) {
+                    self.length = String($0.prefix(max_char_len))
                 }
                     .textFieldStyle(OvalTextFieldStyle())
                     .keyboardType(/*@START_MENU_TOKEN@*/.decimalPad/*@END_MENU_TOKEN@*/)
-                    .padding(5)
                 
                 Picker("Select a unit for length", selection: $selected_length) {
                     ForEach(length_units, id: \.self) {
@@ -143,12 +141,11 @@ struct ContentView: View {
                 .shadow(color: .gray, radius: 2)
                     
                 // Width
-                TextField("Enter Width", text: $width).onReceive(weight.publisher.collect()) {
-                    self.weight = String($0.prefix(max_char_len))
+                TextField("Enter Width", text: $width).onReceive(width.publisher.collect()) {
+                    self.width = String($0.prefix(max_char_len))
                 }
                     .textFieldStyle(OvalTextFieldStyle())
                     .keyboardType(/*@START_MENU_TOKEN@*/.decimalPad/*@END_MENU_TOKEN@*/)
-                    .padding(5)
                 
                 Picker("Select a unit for width", selection: $selected_width) {
                     ForEach(width_units, id: \.self) {
@@ -182,7 +179,7 @@ struct ContentView: View {
                 Spacer()
             }
             /* VStack modifiers*/
-            
+            .padding(.horizontal, 5)
             .padding(.bottom, 100)
             .multilineTextAlignment(.center)
             .pickerStyle(SegmentedPickerStyle())
@@ -200,7 +197,8 @@ struct ContentView: View {
         
         if !(weight.isEmpty || length.isEmpty || width.isEmpty) {
                 
-            let a = SpreadRateFunctions(weight_unit: selected_weight, length_unit: selected_length, width_unit: selected_width, result_unit: selected_result, weight: weight, length: length, width: width)
+            let a = SpreadRateFunctions(weight_unit: selected_weight, length_unit: selected_length, width_unit: selected_width,
+                                        result_unit: selected_result, weight: weight, length: length, width: width)
             result = a.getResults()
         }
         
@@ -209,7 +207,11 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        Group {
+            ContentView()
+            ContentView()
+                .preferredColorScheme(.dark)
+        }
             
     }
 }
@@ -217,10 +219,9 @@ struct ContentView_Previews: PreviewProvider {
 struct OvalTextFieldStyle: TextFieldStyle {
     func _body(configuration: TextField<Self._Label>) -> some View {
         configuration
-            .padding(10)
-            .background(Color.white)
+            .padding(.vertical, 15)
+            .background(Color("textfieldBackground"))
             .cornerRadius(10)
-            .shadow(color: .gray, radius: 2)
+            .shadow(color: Color("buttonShadow"), radius: 2)
     }
 }
-
