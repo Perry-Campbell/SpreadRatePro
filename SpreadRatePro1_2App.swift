@@ -11,7 +11,7 @@ import SwiftUI
 struct SpreadRatePro1_2App: App {
     var body: some Scene {
         WindowGroup {
-            ContentView().preferredColorScheme(.light)
+            ContentView()
         }
     }
 }
@@ -65,10 +65,6 @@ public struct SpreadRateFunctions {
             }
             
         }
-    // Pounds / Yards^2
-    // Pounds / Feet^2
-    // Tons / Feet^2
-    // Kg / Meter^2
     
     //float units should be in ft when passed to function
     func convert_result(result_unit: String, weight: Float, length: Float, width: Float) -> Float {
