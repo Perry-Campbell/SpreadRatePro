@@ -15,15 +15,16 @@ struct ContentView: View {
     @State private var width: String = ""
     @State private var result: String = "0"
     
-    private var weight_units = ["Pounds","Kilograms","Tons"]
+    private var weight_units = ["Gallons", "Pounds","Kilograms","Tons"]
     private var length_units = ["Feet", "Yards", "Meters","Kilometers", "Miles"]
     private var width_units = ["Feet", "Yards", "Meters"]
-    private var result_units = ["lbs/ft", "lbs/yds", "tons/ft", "kg/m"]
+    private var result_units = ["gal/yd", "lbs/ft", "lbs/yd", "tons/ft", "tons/yd",
+                                "kg/m"]
     
     @State private var selected_weight = "Pounds"
     @State private var selected_length = "Feet"
     @State private var selected_width = "Feet"
-    @State private var selected_result = "lbs/yds"
+    @State private var selected_result = "lbs/yd"
     
     
     init() {
@@ -34,7 +35,7 @@ struct ContentView: View {
 
         //this will change the font size
         UISegmentedControl.appearance().setTitleTextAttributes([.font : UIFont.preferredFont(forTextStyle: .largeTitle)], for: .normal)
-
+        UISegmentedControl.appearance().setTitleTextAttributes([.font : UIFont.preferredFont(forTextStyle: .subheadline)], for: .application)
         //these lines change the text color for various states
         UISegmentedControl.appearance().setTitleTextAttributes([.foregroundColor : UIColor.white], for: .selected)
         UISegmentedControl.appearance().setTitleTextAttributes([.foregroundColor : UIColor.label], for: .normal)
@@ -45,8 +46,7 @@ struct ContentView: View {
     var body: some View {
         
         ZStack {
-            LinearGradient(gradient: Gradient(colors: [Color("gradientFade"), Color.blue]),
-                           startPoint: .top, endPoint: .bottom).ignoresSafeArea(edges: .bottom)
+            LinearGradient(gradient: Gradient(colors: [Color("gradientFade"), Color.blue]), startPoint: .top, endPoint: .bottom).ignoresSafeArea(edges: /*@START_MENU_TOKEN@*/.bottom/*@END_MENU_TOKEN@*/)
                 .padding(.top, 50)
             
             VStack {
@@ -57,33 +57,36 @@ struct ContentView: View {
                     .font(.largeTitle)
                     .fontWeight(.medium)
                     .padding(.trailing, -5)
-                    
-                    
-                Text("Pro")
-                    .font(.largeTitle)
-                    .fontWeight(.medium)
-                    .padding(.vertical, 0)
-                    .padding(.horizontal, 10)
-                    .foregroundColor(.white)
-                    .background(Color.blue)
-                    .cornerRadius(15)
+                                      
+                    Text("Pro")
+                        .font(.largeTitle)
+                        .fontWeight(.medium)
+                        .padding(.vertical, 0)
+                        .padding(.horizontal, 10)
+                        .foregroundColor(.white)
+                        .background(Color.blue)
+                        .cornerRadius(15)
                     
                 }
                 Divider()
                 Spacer()
                 
-                // Result
-                
+                // Result                
                 HStack(alignment: .top) {
                     if Float(result) != nil && Float(result) ?? -1 >= 0 {
                         Text(result)
                             .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
                             .padding(.trailing, 3.0)
-                        Text(selected_result)
+                        let resDisplayed = selected_result + "²"
+                        Text(resDisplayed)
                             .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
-                        Text("2")
-                            .font(/*@START_MENU_TOKEN@*/.body/*@END_MENU_TOKEN@*/)
-                            .padding(.leading, -5.0)
+
+                    }
+                    else if (result == "err-gal") {
+                        Text("Cannot convert gallons to weight units")
+                            .foregroundColor(.red)
+                            .font(.title)
+                            .padding()
                     }
                     else {
                         Text("Syntax Error")
@@ -95,9 +98,13 @@ struct ContentView: View {
                 .padding(.top, 40.0)
                 Picker("Select a unit for result", selection: $selected_result) {
                     ForEach(result_units, id: \.self) {
-                        Text($0)
+                        let strText = $0 + "²"
+                        Text(strText)
                     }
                 }.onChange(of: selected_result, perform: { value in
+                    if(selected_result.lowercased().contains("gal")){
+                        selected_weight = "Gallons"
+                    }
                     callSpreadRateFunctions()
                 })
                 .shadow(color: .gray, radius: 2)
@@ -120,6 +127,9 @@ struct ContentView: View {
                         Text($0)
                     }
                 }.onChange(of: selected_weight, perform: { value in
+                    if selected_weight.lowercased().contains("gallons") {
+                        selected_result = "gal/yd"
+                    }
                     callSpreadRateFunctions()
                 })
                 .shadow(color: .gray, radius: 2)
@@ -191,17 +201,21 @@ struct ContentView: View {
     func buttonPressed() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
-    
-    
+        
     func callSpreadRateFunctions(){
         
         if !(weight.isEmpty || length.isEmpty || width.isEmpty) {
-                
-            let a = SpreadRateFunctions(weight_unit: selected_weight, length_unit: selected_length, width_unit: selected_width,
-                                        result_unit: selected_result, weight: weight, length: length, width: width)
-            result = a.getResults()
+            let a: SpreadRateFunctions            
+
+            if (selected_weight.lowercased().contains("gallons") || selected_result.lowercased().contains("gal")) {
+                if (selected_weight.lowercased().contains("gallons") != selected_result.lowercased().contains("gal")) {
+                    result = "err-gal"
+                    return
+                }
+            }                                
+                a = SpreadRateFunctions(weight_unit: selected_weight, length_unit: selected_length, width_unit: selected_width, result_unit: selected_result, weight: weight, length: length, width: width)
+                result = a.getResults()            
         }
-        
     }
 }
 
@@ -225,3 +239,10 @@ struct OvalTextFieldStyle: TextFieldStyle {
             .shadow(color: Color("buttonShadow"), radius: 2)
     }
 }
+
+extension Bool {
+    static func ^ (left: Bool, right: Bool) -> Bool {
+        return left != right
+    }
+}
+
