@@ -81,13 +81,15 @@ public struct SpreadRateFunctions {
                 numerator = weight / 2.20462
             case "tons":
                 numerator = weight / 2000
+            case "gal":
+                numerator = weight
             default:
                 numerator = 0
         }
         switch units[1] {
             case "ft":
                 denominator = length * width
-            case "yds":
+            case "yd":
                 denominator = (length / 3) * (width / 3)
                 
             case "m":
@@ -100,7 +102,6 @@ public struct SpreadRateFunctions {
         return numerator / denominator
     }
     
-    
     func getResults() -> String {
         let weight = self.convert_weight(unit: self.weight_unit, value: self.weight)
         let length = self.convert_length(unit: self.length_unit, value: self.length)
@@ -108,10 +109,9 @@ public struct SpreadRateFunctions {
         if weight < 0 || length <= 0 || width <= 0 {
             return "-1"
         }
-        
+       
         let res = convert_result(result_unit: self.result_unit, weight: weight, length: length, width: width)
-        
-
+      
         return String(res)
 
     }
