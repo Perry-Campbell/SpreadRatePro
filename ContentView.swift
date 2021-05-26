@@ -40,9 +40,3 @@ struct OvalTextFieldStyle: TextFieldStyle {
             .shadow(color: Color("buttonShadow"), radius: 2)
     }
 }
-
-extension Bool {
-    static func ^ (left: Bool, right: Bool) -> Bool {
-        return left != right
-    }
-}
