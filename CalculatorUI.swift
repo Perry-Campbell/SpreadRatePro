@@ -29,41 +29,17 @@ struct CalculatorUI: View {
     @State private var selected_result = "lbs/yd"
     
     init() {
-        //this changes the "thumb" that selects between items
         UISegmentedControl.appearance().selectedSegmentTintColor = .systemBlue
-        //and this changes the color for the whole "bar" background
         UISegmentedControl.appearance().backgroundColor = UIColor.systemBackground
-
-        //this will change the font size
         UISegmentedControl.appearance().setTitleTextAttributes([.font : UIFont.preferredFont(forTextStyle: .largeTitle)], for: .normal)
         UISegmentedControl.appearance().setTitleTextAttributes([.font : UIFont.preferredFont(forTextStyle: .subheadline)], for: .application)
-        //these lines change the text color for various states
         UISegmentedControl.appearance().setTitleTextAttributes([.foregroundColor : UIColor.white], for: .selected)
         UISegmentedControl.appearance().setTitleTextAttributes([.foregroundColor : UIColor.label], for: .normal)
     }
     
     var body: some View {
         ZStack {
-            VStack {
-                // Logo/Title
-                HStack {
-                    Text("SpreadRate")
-                    .font(.largeTitle)
-                    .fontWeight(.medium)
-                    .padding(.trailing, -5)
-                    
-                    
-                Text("Pro")
-                    .font(.largeTitle)
-                    .fontWeight(.medium)
-                    .padding(.vertical, 0)
-                    .padding(.horizontal, 10)
-                    .foregroundColor(.white)
-                    .background(Color.blue)
-                    .cornerRadius(15)
-                    
-                }
-            }
+
             LinearGradient(gradient: Gradient(colors: [Color("gradientFade"), Color.blue]), startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea(edges: /*@START_MENU_TOKEN@*/.bottom/*@END_MENU_TOKEN@*/)
                 .padding(.top, 50)
@@ -71,14 +47,11 @@ struct CalculatorUI: View {
 
                 ScrollView(/*@START_MENU_TOKEN@*/.vertical/*@END_MENU_TOKEN@*/, showsIndicators: false, content: {
                     
-                
-            
                     VStack {
 
                         // banner ad
                         GADBannerViewController()
                             .padding()
-                        
                         
                         Spacer()
                         
@@ -242,11 +215,8 @@ struct CalculatorUI: View {
                     return
                 }
             }
-                                
-
                 a = SpreadRateFunctions(weight_unit: selected_weight, length_unit: selected_length, width_unit: selected_width, result_unit: selected_result, weight: weight, length: length, width: width)
                 result = a.getResults()
-            
         }
         
     }
